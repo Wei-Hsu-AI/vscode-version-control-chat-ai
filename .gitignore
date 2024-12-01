@@ -1,0 +1,32 @@
+# Node.js 相關
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript 編譯輸出
+dist/
+out/
+*.js.map
+*.d.ts
+
+# 作業系統和編輯器產生的暫存檔案
+.DS_Store
+Thumbs.db
+*.log
+
+# Webpack/Bundler 輸出
+coverage/
+*.tgz
+.cache/
+*.webpack
+
+# 打包後的 VSIX 檔案
+*.vsix
+
+# TypeScript 暫存檔案
+*.tsbuildinfo
+
+# 環境變數檔案
+.env
+.env.*
