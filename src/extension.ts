@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import * as iconv from 'iconv-lite';
 import axios from 'axios';
 import { WebviewPanel } from './webviewPanel';
@@ -54,15 +54,26 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // 設置 WebviewPanel 的消息監聽
                 webviewPanel.onDidReceiveMessage(async (message) => {
+                    // 動態選擇 Shell
+                    const shell = process.platform === 'win32' ? 'powershell.exe' : '/bin/bash';
+
                     if (message.command === "executeInTerminal") {
                         terminal.show();
 
-                        // 可能要改成 exec 才能獲取執行的結果
-                        terminal!.sendText(message.text);
-                    } else if (message.command === "fetchGitLog") {
+                        exec(message.text, { shell: shell, cwd: workspaceFolder, encoding: 'buffer' }, (error, stdout, stderr) => {
+                            if (error) {
+                                vscode.window.showErrorMessage(`Error: ${error.message}`);
+                                return;
+                            }
+                            const output = stdout.toString('utf8');
+                            const err = stderr.toString('utf8');
 
-                        // 動態選擇 Shell
-                        const shell = process.platform === 'win32' ? 'powershell.exe' : '/bin/bash';
+                            console.log('err', err)
+
+                            // do something
+
+                        });
+                    } else if (message.command === "fetchGitLog") {
 
                         // 執行命令並捕獲輸出回傳給 Webview
                         exec("git log --graph --all --format=format:'%h %s %d (%ar) - %an'", { shell: shell, cwd: workspaceFolder, encoding: 'buffer' }, (error, stdout, stderr) => {
