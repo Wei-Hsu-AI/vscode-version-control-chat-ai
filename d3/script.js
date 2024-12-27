@@ -1,6 +1,24 @@
 // 模擬的 Git log 資料
+// const gitLog = `
+// c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  (HEAD -> main, new_branch) [55a2428 b83fe92]
+// b83fe92 (wei) (25 minutes ago) (Merge branch 'branch-a-1' into branch-a)  (branch-a) [97e5ab2 9091626]
+// 97e5ab2 (wei) (26 minutes ago) (feat: add txta)  [de5383e]
+// 9091626 (wei) (27 minutes ago) (feat: add txta-1)  (branch-a-1) [de5383e]
+// 55a2428 (wei) (43 minutes ago) (Merge branch 'branch-b')  [25998ce 397f1ce]
+// 25998ce (wei) (45 minutes ago) (update: txt2:)  [e8499cf]
+// e8499cf (wei) (2 hours ago) (feat: delete txt)  [e43037a]
+// 397f1ce (wei) (2 hours ago) (feat: completed a new feature)  (branch-b) [517ae00]
+// e43037a (wei) (2 hours ago) (feat: add txt3)  [2c29e88]
+// 517ae00 (wei) (2 hours ago) (feat: do some change)  [2c29e88]
+// de5383e (wei) (2 hours ago) (feat: add some texts)  [2c29e88]
+// 2c29e88 (wei) (2 hours ago) (feat: add txt2)  [9cf44f3]
+// 9cf44f3 (wei) (2 hours ago) (feat: complete feature a)  (branch-1) [0f1d08b]
+// 0f1d08b (wei) (2 hours ago) (init commit)  []
+// `;
+
 const gitLog = `
-c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  (HEAD -> main, new_branch) [55a2428 b83fe92]
+b01dd03 (wei) (10 minutes ago) (test)  (HEAD -> main) [c10ff55]
+c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  (new_branch) [55a2428 b83fe92]
 b83fe92 (wei) (25 minutes ago) (Merge branch 'branch-a-1' into branch-a)  (branch-a) [97e5ab2 9091626]
 97e5ab2 (wei) (26 minutes ago) (feat: add txta)  [de5383e]
 9091626 (wei) (27 minutes ago) (feat: add txta-1)  (branch-a-1) [de5383e]
@@ -14,12 +32,11 @@ de5383e (wei) (2 hours ago) (feat: add some texts)  [2c29e88]
 2c29e88 (wei) (2 hours ago) (feat: add txt2)  [9cf44f3]
 9cf44f3 (wei) (2 hours ago) (feat: complete feature a)  (branch-1) [0f1d08b]
 0f1d08b (wei) (2 hours ago) (init commit)  []
-`;
-
-
+`
 const newGitLog = `
-b01dd03 (wei) (2 minutes ago) (test)  (HEAD -> main) [c10ff55]
-c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  (new_branch) [55a2428 b83fe92]
+f04ab67 (wei) (15 minutes ago) (feat: test test)  (HEAD -> new_branch) [c10ff55]
+b01dd03 (wei) (10 minutes ago) (test)  (main) [c10ff55]
+c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  [55a2428 b83fe92]
 b83fe92 (wei) (25 minutes ago) (Merge branch 'branch-a-1' into branch-a)  (branch-a) [97e5ab2 9091626]
 97e5ab2 (wei) (26 minutes ago) (feat: add txta)  [de5383e]
 9091626 (wei) (27 minutes ago) (feat: add txta-1)  (branch-a-1) [de5383e]
@@ -173,15 +190,16 @@ svg.call(zoom);
 const g = svg.append("g");
 
 // 獲取 SVG 的寬度和高度屬性值
-const width = +svg.attr("width");
-const height = +svg.attr("height");
+const svgElement = document.querySelector("svg");
+const { width, height } = svgElement.getBoundingClientRect();
 const scale = 0.5;  // 設定初始縮放比例
 
 // 設定初始偏移
 const initialTransform = d3.zoomIdentity
-    .translate(width / 2, height / 2)   // 移動視圖中心到 SVG 的中心
+    .translate(width / 2, height / 4)   // 移動視圖中心到 SVG 的中心
     .scale(scale)                       // 應用縮放
-    .translate(-width / 2, -height / 2); // 將內容移回原點
+// .translate(-width / 2, -height / 2); // 將內容移回原點
+
 svg.call(zoom.transform, initialTransform); // 應用初始變換
 
 // 設定節點的座標範圍
