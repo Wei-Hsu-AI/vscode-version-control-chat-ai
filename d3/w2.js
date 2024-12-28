@@ -458,3 +458,24 @@ class GitGraph {
         this.drawTree(root1, root2);
     }
 }
+
+const gitGraph = GitGraph.getInstance();
+gitGraph.registerSvg("svg");
+
+const gitLog = `
+1489311 (jimmyhealer) (7 seconds ago) (Add feature file)  (feature) [6e5656a]
+6e5656a (jimmyhealer) (7 seconds ago) (Initial commit)  (HEAD -> main) []
+`
+const newGitLog = `
+1489311 (jimmyhealer) (18 seconds ago) (Add feature file)  (HEAD -> main, feature) [6e5656a]
+6e5656a (jimmyhealer) (18 seconds ago) (Initial commit)  []
+`
+
+gitGraph.addCommit(gitLog);
+gitGraph.render();
+
+setTimeout(() => {
+    console.log("Adding new commit");
+    gitGraph.addCommit(newGitLog);
+    gitGraph.render();
+}, 2000);

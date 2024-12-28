@@ -17,39 +17,12 @@
 // `;
 
 const gitLog = `
-b01dd03 (wei) (10 minutes ago) (test)  (HEAD -> main) [c10ff55]
-c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  (new_branch) [55a2428 b83fe92]
-b83fe92 (wei) (25 minutes ago) (Merge branch 'branch-a-1' into branch-a)  (branch-a) [97e5ab2 9091626]
-97e5ab2 (wei) (26 minutes ago) (feat: add txta)  [de5383e]
-9091626 (wei) (27 minutes ago) (feat: add txta-1)  (branch-a-1) [de5383e]
-55a2428 (wei) (43 minutes ago) (Merge branch 'branch-b')  [25998ce 397f1ce]
-25998ce (wei) (45 minutes ago) (update: txt2:)  [e8499cf]
-e8499cf (wei) (2 hours ago) (feat: delete txt)  [e43037a]
-397f1ce (wei) (2 hours ago) (feat: completed a new feature)  (branch-b) [517ae00]
-e43037a (wei) (2 hours ago) (feat: add txt3)  [2c29e88]
-517ae00 (wei) (2 hours ago) (feat: do some change)  [2c29e88]
-de5383e (wei) (2 hours ago) (feat: add some texts)  [2c29e88]
-2c29e88 (wei) (2 hours ago) (feat: add txt2)  [9cf44f3]
-9cf44f3 (wei) (2 hours ago) (feat: complete feature a)  (branch-1) [0f1d08b]
-0f1d08b (wei) (2 hours ago) (init commit)  []
+1489311 (jimmyhealer) (7 seconds ago) (Add feature file)  (feature) [6e5656a]
+6e5656a (jimmyhealer) (7 seconds ago) (Initial commit)  (HEAD -> main) []
 `
 const newGitLog = `
-f04ab67 (wei) (15 minutes ago) (feat: test test)  (HEAD -> new_branch) [c10ff55]
-b01dd03 (wei) (10 minutes ago) (test)  (main) [c10ff55]
-c10ff55 (wei) (23 minutes ago) (Merge branch 'branch-a')  [55a2428 b83fe92]
-b83fe92 (wei) (25 minutes ago) (Merge branch 'branch-a-1' into branch-a)  (branch-a) [97e5ab2 9091626]
-97e5ab2 (wei) (26 minutes ago) (feat: add txta)  [de5383e]
-9091626 (wei) (27 minutes ago) (feat: add txta-1)  (branch-a-1) [de5383e]
-55a2428 (wei) (43 minutes ago) (Merge branch 'branch-b')  [25998ce 397f1ce]
-25998ce (wei) (45 minutes ago) (update: txt2:)  [e8499cf]
-e8499cf (wei) (2 hours ago) (feat: delete txt)  [e43037a]
-397f1ce (wei) (2 hours ago) (feat: completed a new feature)  (branch-b) [517ae00]
-e43037a (wei) (2 hours ago) (feat: add txt3)  [2c29e88]
-517ae00 (wei) (2 hours ago) (feat: do some change)  [2c29e88]
-de5383e (wei) (2 hours ago) (feat: add some texts)  [2c29e88]
-2c29e88 (wei) (2 hours ago) (feat: add txt2)  [9cf44f3]
-9cf44f3 (wei) (2 hours ago) (feat: complete feature a)  (branch-1) [0f1d08b]
-0f1d08b (wei) (2 hours ago) (init commit)  []
+1489311 (jimmyhealer) (18 seconds ago) (Add feature file)  (HEAD -> main, feature) [6e5656a]
+6e5656a (jimmyhealer) (18 seconds ago) (Initial commit)  []
 `
 
 /**
@@ -192,7 +165,7 @@ const g = svg.append("g");
 // 獲取 SVG 的寬度和高度屬性值
 const svgElement = document.querySelector("svg");
 const { width, height } = svgElement.getBoundingClientRect();
-const scale = 0.5;  // 設定初始縮放比例
+const scale = 1.5;  // 設定初始縮放比例
 
 // 設定初始偏移
 const initialTransform = d3.zoomIdentity
@@ -302,38 +275,6 @@ function drawNodes(nodesData) {
         .attr("dy", 15) // 放置於節點圓下方
         .text(d => d.time) // 顯示提交時間
 
-    // 為每個節點添加分支箭頭和標籤
-    nodeEnter.each(function (d) {
-        if (d.branches && d.branches.length > 0) {
-            const nodeGroup = d3.select(this); // 選擇當前節點組
-
-            d.branches.forEach((branch, i) => {
-                const spacing = 25; // 每個箭頭之間的垂直間距
-                const arrow_height = 15; // 箭頭的高度
-                const arrow_width = 30; // 箭頭的寬度
-
-                // 計算箭頭初始的 Y 偏移，使箭頭在節點上下對稱排列
-                const arrowInitY = parseInt((d.branches.length - 1) / 2) * spacing
-                const arrowOffsetY = arrowInitY - i * spacing;
-
-                // 添加箭頭
-                nodeGroup.append("line")
-                    .attr("class", "branch-arrow")
-                    .attr("x1", NODE_RADIUS + arrow_width + 10) // 起點 X 座標
-                    .attr("y1", arrowOffsetY - arrow_height) // 起點 Y 座標
-                    .attr("x2", NODE_RADIUS + 10) // 終點 X 座標
-                    .attr("y2", arrowOffsetY); // 終點 Y 座標
-
-                // 添加分支名稱標籤
-                nodeGroup.append("text")
-                    .attr("class", "branch-label")
-                    .attr("x", NODE_RADIUS + arrow_width + 15) // 標籤 X 座標
-                    .attr("y", arrowOffsetY - arrow_height - 5) // 標籤 Y 座標，與箭頭對齊
-                    .text(branch); // 顯示分支名稱
-            });
-        }
-    });
-
     // 合併新舊節點並進行過渡
     nodeEnter.merge(nodeSelection)
         .transition()
@@ -342,6 +283,106 @@ function drawNodes(nodesData) {
 
     // 刪除不存在的節點
     nodeSelection.exit().remove();
+}
+
+function collectBranchHeads(root) {
+    const branchHeads = [];
+
+    function traverse(node) {
+        if (node.branches && node.branches.length > 0) {
+            node.branches.forEach((branchName, i) => {
+                branchHeads.push({
+                    branchName,
+                    commitId: node.id,
+                    x: node.x,
+                    y: node.y,
+                    index: i,
+                    total: node.branches.length 
+                });
+            });
+        }
+        node.children.forEach(child => traverse(child));
+    }
+
+    traverse(root);
+    return branchHeads;
+}
+
+function drawBranchHeads(branchHeadsOld, branchHeadsNew) {
+    const oldMap = {};
+    branchHeadsOld.forEach(d => {
+        oldMap[d.branchName] = d;
+    });
+
+    const newData = branchHeadsNew.map(d => {
+        const oldItem = oldMap[d.branchName];
+        if (oldItem) {
+            const moved = (oldItem.x !== d.x || oldItem.y !== d.y);
+            return {
+                ...d,
+                oldX: oldItem.x,
+                oldY: oldItem.y,
+                moved
+            };
+        } else {
+            return {
+                ...d,
+                oldX: d.x,
+                oldY: d.y,
+                moved: false
+            };
+        }
+    });
+
+    const selection = g.selectAll(".branch-head")
+        .data(newData, d => d.branchName);
+
+    selection.exit()
+        .transition()
+        .duration(1000)
+        .attr("transform", d => `translate(${d.x},${d.y})`) 
+        .remove();
+
+    const enter = selection.enter()
+        .append("g")
+        .attr("class", "branch-head")
+        .attr("transform", d => {
+            if (d.moved) {
+                return `translate(${d.oldX}, ${d.oldY})`;
+            } else {
+                return `translate(${d.x}, ${d.y})`;
+            }
+        });
+
+    enter.each(function(d) {
+        const nodeGroup = d3.select(this);
+        const spacing = 25;
+        const arrow_height = 15;
+        const arrow_width = 30;
+
+        const arrowInitY = parseInt((d.total - 1) / 2) * spacing;
+        const arrowOffsetY = arrowInitY - d.index * spacing;
+
+        nodeGroup.append("line")
+            .attr("class", "branch-arrow")
+            .attr("x1", NODE_RADIUS + arrow_width + 10)
+            .attr("y1", arrowOffsetY - arrow_height)
+            .attr("x2", NODE_RADIUS + 10)
+            .attr("y2", arrowOffsetY);
+
+        nodeGroup.append("text")
+            .attr("class", "branch-label")
+            .attr("x", NODE_RADIUS + arrow_width + 15)
+            .attr("y", arrowOffsetY - arrow_height - 5)
+            .text(d.branchName);
+    });
+
+    enter.merge(selection)
+        .transition()
+        .duration(d => d.moved ? 1000 : 0)
+        .attr("transform", d => {
+            return `translate(${d.x}, ${d.y}) scale(1)`;
+        });
 }
 
 /**
@@ -437,8 +478,13 @@ function drawTree(rootOld, rootNew) {
 
     // 繪製節點
     drawNodes(nodesData)
+
+    const branchHeadsOld = collectBranchHeads(rootOld);
+    const branchHeadsNew = collectBranchHeads(rootNew);
+
+    // -- 4. 繪製 branch heads (箭頭 & label) --
+    drawBranchHeads(branchHeadsOld, branchHeadsNew);
 }
 
 
 drawTree(root1, root2);
-

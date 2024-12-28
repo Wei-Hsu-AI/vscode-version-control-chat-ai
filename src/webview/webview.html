@@ -4,19 +4,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webview Practice</title>
-    <script src="${scriptUri}"></script>
+    <title>Webview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #toolbar {
+            padding: 10px;
+            background-color: #f3f3f3;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        #input-section {
+            padding: 10px;
+            border-top: 1px solid #ccc;
+            background-color: #f9f9f9;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fefefe;
+            color: #171717;
+        }
+
+        .message.ai {
+            background-color: #e8f4fd;
+        }
+
+        .message.user {
+            background-color: #ffad2a;
+        }
+
+        .row {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        .col {
+            flex-grow: 1;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        svg {
+                border: 1px solid #ccc;
+            }
+            .link {
+                fill: none;
+                stroke: #ccc;
+                stroke-width: 2px;
+            }
+            .node circle {
+                fill: #6c63ff;
+                stroke: #b9b9ff;
+                stroke-width: 3px;
+            }
+            .node text {
+                pointer-events: none;
+                font-size: 12px;
+                fill: #000;
+                text-anchor: middle;
+            }
+            .node .author {
+                font-size: 12px;
+                fill: #333;
+                text-anchor: middle;
+            }
+            .node .time {
+                font-size: 10px;
+                fill: #666;
+                text-anchor: middle;
+            }
+            .branch-arrow {
+                stroke: #f00;
+                stroke-width: 2px;
+                marker-end: url(#arrow);
+            }
+            .branch-label {
+                font-size: 12px;
+                fill: #333;
+                text-anchor: start;
+            }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dtree@2.4.1/dist/dTree.min.js"></script>
 </head>
 
 <body>
-    <h1 style="color: white;">Hello Webview!</h1>
-    <img src="https://i.imgur.com/hzK0JDS.jpg" width="50%" />
-    <br>
-    <button id="fetch-terminal-info">Fetch Terminal Info</button>
-    <br>
-    <input id="command-input" type="text" placeholder="Enter command" />
-    <button id="send-command">Send Command</button>
-    <div id="terminal-info"></div>
+    <div class="row">
+        <div class="col">
+            <div id="toolbar">
+                <button id="new-dialog">+</button>
+                <input id="task-input" type="text" placeholder="輸入任務描述..." value="我想把 feature 分支 merge 到 main">
+            </div>
+
+            <div id="content"></div>
+
+            <div id="input-section">
+                <input id="user-input" type="text" placeholder="輸入回覆..." disabled>
+                <button id="send-button">送出</button>
+            </div>
+        </div>
+        <div class="col">
+            <svg width="100%" height="100%"></svg>
+        </div>
+    </div>
+
+    <script src="${scriptUri}"></script>
+    <script>
+        const vscode = acquireVsCodeApi();
+        let msgId = null;
+
+        document.getElementById('new-dialog').addEventListener('click', () => {
+            const taskInput = document.getElementById('task-input').value;
+            if (taskInput) {
+                vscode.postMessage({ type: 'task', task: taskInput });
+                document.getElementById('content').innerHTML = '';
+                document.getElementById('task-input').value = '';
+            } else {
+                alert('請輸入任務描述！');
+            }
+        });
+
+        document.getElementById('send-button').addEventListener('click', () => {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput) {
+                vscode.postMessage({ type: 'ask_user_response', answer: userInput, id: msgId });
+                msgId = null;
+                const content = document.getElementById('content');
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user';
+                userMessage.textContent = userInput;
+                content.appendChild(userMessage);
+                document.getElementById('user-input').value = '';
+            } else {
+                alert('請輸入訊息！');
+            }
+        });
+        const gitGraph = GitGraph.getInstance();
+        gitGraph.registerSvg("svg");
+
+        window.addEventListener('message', (event) => {
+            const message = event.data;
+            const content = document.getElementById('content');
+
+            if (message.type === 'message') {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                aiMessage.textContent = message.message;
+                content.appendChild(aiMessage);
+            } else if (message.type === 'ask_user') {
+                document.getElementById('user-input').disabled = false;
+                msgId = message.messageId;
+                const promptMessage = document.createElement('div');
+                promptMessage.className = 'message ai';
+                promptMessage.textContent = message.message;
+                content.appendChild(promptMessage);
+            } else if (message.type === 'git_log') {
+                const commit = message.gitLog;
+                if (gitGraph.addCommit(commit) === 1) {
+                    gitGraph.render();
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
