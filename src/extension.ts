@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
                 vscode.window.showInformationMessage(`Git version:\n${output}`);
             })
         }
-    )
+    );
 
     let openWebView = vscode.commands.registerCommand(
         "webview-api.openWebView",

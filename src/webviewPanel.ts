@@ -6,6 +6,8 @@ import * as fs from "fs";
  * WebviewPanel 類別負責管理在 VSCode 中的單一 Webview 面板實例。
  * 採用 Singleton 模式以確保同一時間只有一個實例存在。
  */
+
+
 export class WebviewPanel {
     // 靜態實例，用於保存 WebviewPanel 的唯一實例（Singleton 模式）。
     private static _instance: WebviewPanel | null = null;
@@ -30,12 +32,29 @@ export class WebviewPanel {
      */
     private constructor(context: vscode.ExtensionContext) {
         this.context = context;
-        this._panel = this.createPanel(context);
+        // Create webview panel with security options
+        this._panel = vscode.window.createWebviewPanel(
+            'gitGPT',
+            'Git GPT',
+            vscode.ViewColumn.One,
+            {
+                enableScripts: true,
+                localResourceRoots: [
+                    vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'media') 
+                ]
+            }
+        );
+
+        this.loadWebviewContent();
+
+        // Handle panel disposal
+        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
         this.onLifeCycleChanges();
         this.onWebViewMessage();
-        this.loadWebviewContent();
         this._disposables.push(this._panel);
+    
     }
+
 
     /**
      * 獲取 WebviewPanel 的單一實例，必要時進行創建。
@@ -134,15 +153,35 @@ export class WebviewPanel {
      * @returns 要顯示在 Webview 中的 HTML 內容。
      */
     private loadWebviewContent(): void {
+        // 加載 HTML 內容
         const htmlPath = path.join(this.context.extensionPath, 'src', 'webview', 'webview.html');
         let htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
-        // 替換 scriptUri 變數
-        const scriptUri = this.webview.asWebviewUri(
+        // 使用 webview.asWebviewUri 轉換 CSS 文件的路徑
+        const cssUri = this._panel.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'media', 'css', 'style.css')
+        );
+        htmlContent = htmlContent.replace('${styleUri}', cssUri.toString());
+
+        // 動態加入 Google Fonts 和 Material Icons 的連結
+        const googleFontsLink = `
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        `;
+
+        // 插入 Google Fonts 的 HTML
+        htmlContent = htmlContent.replace('${googleFontsLink}', googleFontsLink);
+    
+        // 使用 webview.asWebviewUri 轉換 JS 文件的路徑
+        const scriptUri = this._panel.webview.asWebviewUri(
             vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'webview.js')
         );
         htmlContent = htmlContent.replace('${scriptUri}', scriptUri.toString());
-
+    
+        // 設置到 Webview 面板中
         this._panel.webview.html = htmlContent;
     }
 
