@@ -40,8 +40,9 @@ export class WebviewPanel {
             {
                 enableScripts: true,
                 localResourceRoots: [
-                    vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'media') 
-                ]
+                    vscode.Uri.file(context.extensionPath),
+                ],
+                retainContextWhenHidden: true
             }
         );
 
@@ -154,12 +155,13 @@ export class WebviewPanel {
      */
     private loadWebviewContent(): void {
         // 加載 HTML 內容
-        const htmlPath = path.join(this.context.extensionPath, 'src', 'webview', 'webview.html');
+        const htmlPath = path.join(this.context.extensionPath, 'dist', 'webview.html');
         let htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
         // 使用 webview.asWebviewUri 轉換 CSS 文件的路徑
         const cssUri = this._panel.webview.asWebviewUri(
-            vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'media', 'css', 'style.css')
+            vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'style.css')
+            // vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'media', 'css', 'style.css')
         );
         htmlContent = htmlContent.replace('${styleUri}', cssUri.toString());
 
@@ -177,7 +179,7 @@ export class WebviewPanel {
     
         // 使用 webview.asWebviewUri 轉換 JS 文件的路徑
         const scriptUri = this._panel.webview.asWebviewUri(
-            vscode.Uri.joinPath(this.context.extensionUri, 'src', 'webview', 'webview.js')
+            vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview.js')
         );
         htmlContent = htmlContent.replace('${scriptUri}', scriptUri.toString());
     

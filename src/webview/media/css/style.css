@@ -31,14 +31,6 @@ body {
     background-color: var(--outgoing-chat-bg);
 }
 
-/* Chat container style */
-
-.chat-container {
-    overflow-y: auto;
-    max-height: 100vh;
-    padding-bottom: 150px;
-}
-
 /* Typing Container Style */
 
 .typing-container {
@@ -103,7 +95,7 @@ body {
     visibility: hidden;
 }
 
-.typing-textarea textarea:valid ~ span {
+.typing-textarea textarea:valid~span {
     visibility: visible;
 }
 
@@ -125,6 +117,7 @@ body {
 /* Responsive media query */
 
 @media screen and (max-width: 600px) {
+
     /* Typing Container */
     .typing-container {
         padding: 15px 10px;
@@ -142,7 +135,109 @@ body {
     }
 
     span.material-symbols-rounded {
-        font-size: 1.25rem!important;
+        font-size: 1.25rem !important;
     }
-    
+}
+
+/* 
+    Jimmyhealer
+*/
+.chat-container {
+    overflow-y: auto;
+    height: calc(100vh - 96px);
+}
+
+.button {
+    cursor: pointer;
+}
+
+.option {
+    font-size: 18px;
+    margin: 0 4px;
+    padding: 0 4px;
+    min-width: 48px;
+    background-color: #b9b9ff;
+    color: var(--text-color);
+    border-radius: 5px;
+}
+
+.message {
+    margin: 5px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: var(--incoming-chat-bg);
+    color: var(--text-color);
+    font-size: 20px;
+}
+
+.message.ai {
+    background-color: var(--incoming-chat-bg);
+}
+
+.message.user {
+    background-color: var(--outgoing-chat-bg);
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    overflow-y: hidden;
+}
+
+.col {
+    flex: 1;
+    width: 50%;
+}
+
+/* 
+D3 style
+*/
+
+svg {
+    width: 100%;
+    height: calc(100vh - 96px);
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
+
+.node circle {
+    fill: #6c63ff;
+    stroke: #b9b9ff;
+}
+
+.node text {
+    pointer-events: none;
+    font-size: 12px;
+    fill: #000;
+    text-anchor: middle;
+}
+
+.node .author {
+    font-size: 12px;
+    fill: #333;
+    text-anchor: middle;
+}
+
+.node .time {
+    font-size: 10px;
+    fill: #8b8b8b;
+    text-anchor: middle;
+}
+
+.branch-arrow {
+    stroke: #f00;
+    stroke-width: 2px;
+    marker-end: url(#arrow);
+}
+
+.branch-label {
+    font-size: 12px;
+    fill: #d3d3d3;
+    text-anchor: start;
 }

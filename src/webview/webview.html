@@ -1,39 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Git GPT</title>
-
     <!-- Google Fonts -->
     ${googleFontsLink}
-    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="${styleUri}">
-    
-    
+    <!-- D3 -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dtree@2.4.1/dist/dTree.min.js"></script>
 </head>
 
 <body>
-        <!-- Chats container -->
-        <div class="chat-container"></div>
-
-        <!-- Typing container -->
-        <div class="typing-container">
-            <div class="typing-content">
-                <div class="typing-textarea">
-                    <textarea id="chat-input" spellcheck="false" placeholder="Enter a prompt here..." required></textarea>
-                    <span id="send-btn" class="material-symbols-rounded">send</span>
-                </div>
-                <div class="typing-controls">
-                    <span id="theme-btn" class="material-symbols-rounded">light_mode</span>
-                    <span id="delete-btn" class="material-symbols-rounded">delete</span>
-                </div>
-            </div>
+    <!-- Chats container -->
+    <div class="row">
+        <div class="col">
+            <div class="chat-container"></div>
         </div>
 
-        <!-- Scripts -->
-        <script src="${scriptUri}"></script>
+        <div class="col">
+            <svg></svg>
+        </div>
+    </div>
+
+    <!-- Typing container -->
+    <div class="typing-container">
+        <div class="typing-content">
+            <div class="typing-textarea">
+                <textarea id="chat-input" spellcheck="false" placeholder="Enter a prompt here..." required></textarea>
+                <span id="send-btn" class="material-symbols-rounded button">send</span>
+            </div>
+            <div class="typing-controls">
+                <span id="theme-btn" class="material-symbols-rounded button">light_mode</span>
+                <span id="delete-btn" class="material-symbols-rounded button">delete</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="${scriptUri}"></script>
 </body>
 
 </html>

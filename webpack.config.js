@@ -54,6 +54,10 @@ const extensionConfig = {
         {
           from: path.resolve(__dirname, 'src/**/*.css'),
           to: path.resolve(__dirname, 'dist/[name][ext]')
+        },
+        {
+          from: path.resolve(__dirname, 'src/**/*.js'),
+          to: path.resolve(__dirname, 'dist/[name][ext]')
         }
       ]
     })

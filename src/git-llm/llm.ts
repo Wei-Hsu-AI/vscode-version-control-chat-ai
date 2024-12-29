@@ -6,7 +6,7 @@ class LLM {
   private model: string;
   private groq: Groq;
 
-  constructor(apiKey: string, model: string = "llama-3.1-70b-versatile") {
+  constructor(apiKey: string, model: string = "llama-3.3-70b-versatile") {
     this.model = model;
     this.groq = new Groq({ apiKey });
   }
@@ -39,7 +39,7 @@ class LLM {
       { role: "user", content: command }
     ];
 
-    const completion = await this.callLLM(messages, { model: "llama-3.2-3b-preview", toolUse: false });
+    const completion = await this.callLLM(messages, { model: "llama-3.1-8b-instant", toolUse: false });
     const content = completion.content;
 
     return !(content.includes("Y") && !content.includes("N"));

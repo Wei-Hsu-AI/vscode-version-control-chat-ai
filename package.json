@@ -1,8 +1,8 @@
 {
-  "name": "git-ai-helper",
+  "name": "git-gpt",
   "displayName": "Chat with AI for Git",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -10,7 +10,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:webview.helloWorld"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
