@@ -1,43 +1,69 @@
-
 window.addEventListener("DOMContentLoaded", () => {
-    const $h1 = document.querySelector('h1');
-    $h1.innerHTML = 'Hello Webview and Javascript!';
+  // 獲取 VS Code API
+  const vscode = acquireVsCodeApi();
 
-    const vscode = acquireVsCodeApi();
-    const fetchButton = document.getElementById('fetch-terminal-info');
-    const terminalInfoDiv = document.getElementById('terminal-info');
-    const commandInput = document.getElementById('command-input');
-    const sendButton = document.getElementById('send-command');
+  // 綁定 DOM 元素
+  const sendButton = document.getElementById("send-btn");
+  const themeButton = document.getElementById("theme-btn");
+  const deleteButton = document.getElementById("delete-btn");
+  const chatInput = document.getElementById("chat-input");
+  const chatContainer = document.querySelector(".chat-container");
 
-    fetchButton.addEventListener('click', () => {
-        vscode.postMessage({ command: "fetchGitLog" });
-    });
+  // 點擊 "Send" 按鈕處理
+  sendButton.addEventListener("click", () => {
+      const userInput = chatInput.value.trim();
+      if (userInput) {
+          addMessageToChat('user', userInput); // 顯示使用者訊息
+          vscode.postMessage({ type: 'user_message', message: userInput }); // 發送訊息到 VS Code
+          chatInput.value = ""; // 清空輸入框
+      } else {
+          alert('請輸入訊息！');
+      }
+  });
 
-    sendButton.addEventListener('click', () => {
-        const command = commandInput.value;
-        if (command) {
-            vscode.postMessage({ command: "executeInTerminal", text: command });
-        }
-    });
+  // 點擊 "Delete" 按鈕處理
+  deleteButton.addEventListener("click", () => {
+      chatContainer.innerHTML = ""; // 清空聊天視窗
+  });
 
-    window.addEventListener("message", (event) => {
-        const message = event.data;
-        console.log("Message received from Extension:", message);
+  // 切換主題功能
+  themeButton.addEventListener("click", () => {
+    // 讀取儲存的主題
+    const themeColor = localStorage.getItem("themeColor");
+    
+    // 如果目前的主題是 light_mode，則切換到 dark_mode，反之亦然
+    if (themeColor === "light_mode") {
+        document.body.classList.add("light-mode");
+        localStorage.setItem("themeColor", "light_mode"); // 儲存選擇的主題
+    } else {
+        document.body.classList.remove("light-mode");
+        localStorage.setItem("themeColor", "dark_mode"); // 儲存選擇的主題
+    }
+    
+    // 發送切換主題的命令到 VS Code
+    const theme = document.body.classList.contains("light-mode") ? "dark_mode" : "light_mode";
+    vscode.postMessage({ command: "toggleTheme", theme });
+  });
 
-        if (message.command === "gitLog") {
-            terminalInfoDiv.innerText = message.text; // 顯示終端機資訊
-        } else if (message.command === "updateContent") {
-            document.querySelector('h1').innerText = message.text;
-        }
-    });
+  // 接收 VS Code 傳來的訊息
+  window.addEventListener("message", (event) => {
+      const message = event.data;
+      if (message.type === "message") {
+          addMessageToChat("ai", message.message); // 顯示 AI 訊息
+      } else if (message.type === "ask_user") {
+          chatInput.disabled = false; // 啟用輸入框
+          addMessageToChat("ai", message.message); // 顯示提示訊息
+      }
+  });
+
+  // 添加訊息到聊天視窗
+  function addMessageToChat(type, text) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = text;
+      chatContainer.appendChild(messageDiv);
+
+      // 滾動到底部
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
 });
-
-// window.addEventListener("message", (event) => {
-//     // 處理 Extension 傳來的訊息
-//     const message = event.data; // event.data 會包含 Extension 發送的內容
-//     console.log("Message received from Extension:", message);
-
-//     if (message.command === "updateContent") {
-//         document.querySelector('h1').innerText = message.text;
-//     }
-// });
