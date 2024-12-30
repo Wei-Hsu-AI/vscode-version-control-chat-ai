@@ -40,9 +40,9 @@ class LLM {
     ];
 
     const completion = await this.callLLM(messages, { model: "llama-3.1-8b-instant", toolUse: false });
-    const content = completion.content;
+    const content = completion.content.replace("\n", "").trim();
 
-    return !(content.includes("Y") && !content.includes("N"));
+    return content.includes("Y") && !content.includes("N");
   }
 
   private llamaGuardCheck(command: string): boolean {

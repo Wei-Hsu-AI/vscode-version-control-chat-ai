@@ -14,7 +14,7 @@ export function runCommandCompose(
         { shell: shell, cwd: cwd, encoding: "buffer" },
         (error, stdout, stderr) => {
           if (error) {
-            reject(new Error(`Error: ${error.message}`));
+            resolve(`Error: ${error.message}`);
             return;
           }
   
@@ -35,7 +35,7 @@ export function runCommandCompose(
         reject(new Error(`Failed to start process: ${error.message}`));
       });
     } catch (error: any) {
-      reject(new Error(`Error: ${error.message}`));
+      resolve(`Error: ${error.message}`);
     }
   });
 }

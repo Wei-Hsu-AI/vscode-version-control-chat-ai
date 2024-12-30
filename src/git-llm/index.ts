@@ -68,9 +68,9 @@ class Flow {
 
   private async executeCommand(command: string): Promise<string> {
     let output = `執行指令：${command}\n`;
-    if (!this.llm.securityCheck(command)) {
+    if (await this.llm.securityCheck(command)) {
       const yn = await this.askUser(
-        "Do you want to execute this non-secure command?",
+        `你要執行這個可能無法恢復的指令嗎？\n${command}`,
         ["Y", "N"]
       );
       if (yn?.trim().toLowerCase() !== "y") {

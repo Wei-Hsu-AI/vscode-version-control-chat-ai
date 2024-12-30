@@ -55,6 +55,10 @@ window.addEventListener("DOMContentLoaded", () => {
     // 點擊 "Delete" 按鈕處理
     deleteButton.addEventListener("click", () => {
         chatContainer.innerHTML = ""; // 清空聊天視窗
+        chatInput.value = ""; // 清空輸入框
+        chatInput.disabled = false; // 啟用輸入框
+        messageId = null;
+        gitGraph.clear();
     });
 
     // 切換主題功能
