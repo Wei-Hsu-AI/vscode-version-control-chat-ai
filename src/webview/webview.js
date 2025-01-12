@@ -156,7 +156,7 @@ class GitGraph {
             this.g = this.svg.append("g");
 
             const zoom = d3.zoom()
-                .scaleExtent([0.75, 3])
+                .scaleExtent([0.3, 3])
                 .on("zoom", (event) => {
                     if (this.g) this.g.attr("transform", event.transform);
                 });
@@ -166,7 +166,7 @@ class GitGraph {
             const svgElement = document.querySelector("svg");
             if (svgElement) {
                 const { width, height } = svgElement.getBoundingClientRect();
-                const scale = 1.5;
+                const scale = 0.8;
                 const initialTransform = d3.zoomIdentity
                     .translate(width / 2, height / 4)
                     .scale(scale);
