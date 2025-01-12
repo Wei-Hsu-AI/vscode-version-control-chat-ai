@@ -61,7 +61,7 @@ class Flow {
   constructor(path: string, task: string, panel: WebviewPanel) {
     this.panel = panel;
     this.llmMessages = new LLM_Message(task);
-    this.llm = new LLM(process.env.GROQ_API_KEY ?? "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");
+    this.llm = new LLM(process.env.GROQ_API_KEY ?? "YOUR_GROQ_API_KEY");
     this.path = path;
     this.llmOutput = null;
   }
