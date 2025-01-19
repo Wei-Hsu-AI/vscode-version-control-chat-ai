@@ -7,7 +7,7 @@ const terminalName = "WebView Terminal";
 
 export function activate(context: vscode.ExtensionContext) {
     let queryLLM = vscode.commands.registerCommand(
-        'llm-interaction.queryLLM',
+        'gitgpt.queryLLM',
         async () => {
             const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? (() => { throw new Error('No workspace folder is open.'); })();
 
@@ -23,8 +23,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    let openWebView = vscode.commands.registerCommand(
-        "webview-api.openWebView",
+    let openAIAssistant = vscode.commands.registerCommand(
+        "gitgpt.openAIAssistant",
         () => {
             try {
                 const webviewPanel = WebviewPanel.getInstance(context);
@@ -47,7 +47,33 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    context.subscriptions.push(queryLLM, openWebView);
+    let openGitLogViewer = vscode.commands.registerCommand(
+        "gitgpt.openGitLogViewer",
+        () => {
+            try {
+                /**
+                 * webviewpanel應設置為可以打開兩個不同的webview
+                 */
+                const webviewPanel = WebviewPanel.getInstance(context);
+                const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? (() => { throw new Error('No workspace folder is open.'); })();
+
+                webviewPanel.onDidReceiveMessage((message) => {
+                    /**
+                     * 當git相關指令被執行時，調用git log取得log並在log tree page中顯示
+                     */
+                });
+            } catch (error) {
+                if (error instanceof Error) {
+                    vscode.window.showErrorMessage(`Error: ${error.message}`);
+                } else {
+                    vscode.window.showErrorMessage(`Unknown error occurred.`);
+                }
+                console.log(error);
+            }
+        }
+    );
+
+    context.subscriptions.push(queryLLM, openAIAssistant, openGitLogViewer);
 }
 
 export function deactivate() { }
