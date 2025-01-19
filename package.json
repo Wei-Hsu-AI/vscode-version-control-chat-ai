@@ -17,20 +17,25 @@
     "menus": {
       "editor/title": [
         {
-          "command": "webview-api.openWebView",
+          "command": "gitgpt.openAIAssistant",
           "group": "navigation"
         }
       ]
     },
     "commands": [
       {
-        "command": "webview-api.openWebView",
-        "title": "Open Webview",
-        "icon": "$(browser)"
+        "command": "gitgpt.openAIAssistant",
+        "title": "GitGPT: Open AI Assistant",
+        "icon": "$(comment-discussion)"
       },
       {
-        "command": "llm-interaction.queryLLM",
-        "title": "Query LLM"
+        "command": "gitgpt.openGitLogViewer",
+        "title": "GitGPT: Open Git Log Viewer",
+        "icon": "$(git-branch)"
+      },
+      {
+        "command": "gitgpt.queryLLM",
+        "title": "GitGPT: Query AI Assistant"
       }
     ]
   },
