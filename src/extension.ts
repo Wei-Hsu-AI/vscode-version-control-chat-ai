@@ -2,16 +2,61 @@ import * as vscode from "vscode";
 import { Flow } from "./git-llm"
 import { exec } from 'child_process';
 import { WebviewPanel } from './webviewPanel';
+import * as path from 'path';
 
-const terminalName = "WebView Terminal";
+let currentWorkspace: string | undefined;
+
+async function selectWorkspaceFolder(): Promise<string | undefined> {
+    const folderUri = await vscode.window.showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true, // 只允許選擇資料夾
+        canSelectMany: false, // 只允許選擇一個
+        openLabel: '選擇資料夾'
+    });
+
+    if (folderUri && folderUri[0]) {
+        return folderUri[0].fsPath; // 返回選中的資料夾路徑
+    } else {
+        return undefined;
+    }
+}
+
+function updateStatusBarItem(statusBarItem: vscode.StatusBarItem) {
+    if (currentWorkspace) {
+        // 僅顯示資料夾名稱，而非完整路徑
+        const folderName = path.basename(currentWorkspace);
+        statusBarItem.text = `$(folder) ${folderName}`;
+        statusBarItem.tooltip = `${currentWorkspace}`; // 保留完整路徑作為工具提示
+    } else {
+        statusBarItem.text = `$(folder) No Workspace`;
+        statusBarItem.tooltip = 'No workspace folder selected';
+    }
+    statusBarItem.show();
+}
+
 
 export function activate(context: vscode.ExtensionContext) {
-    let queryLLM = vscode.commands.registerCommand(
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+    statusBarItem.command = 'gitgpt.selectWorkspace';
+
+    currentWorkspace =
+        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ??
+        undefined;
+    updateStatusBarItem(statusBarItem); // 初始化 Status Bar 顯示
+
+    const selectWorkspaceCommand = vscode.commands.registerCommand('gitgpt.selectWorkspace', async () => {
+        const folderPath = await selectWorkspaceFolder();
+        if (folderPath) {
+            vscode.window.showInformationMessage(`Selected workspace folder: ${folderPath}`);
+            currentWorkspace = folderPath; // 更新當前 Workspace
+            updateStatusBarItem(statusBarItem); // 更新 Status Bar
+        }
+    });
+
+    const queryLLM = vscode.commands.registerCommand(
         'gitgpt.queryLLM',
         async () => {
-            const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? (() => { throw new Error('No workspace folder is open.'); })();
-
-            vscode.window.showInformationMessage(`workspace: ${cwd}`);
+            const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
 
             exec('git status', { encoding: 'buffer', cwd: cwd }, (error, stdout, stderr) => {
                 if (error) {
@@ -23,12 +68,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    let openAIAssistant = vscode.commands.registerCommand(
+    const openAIAssistant = vscode.commands.registerCommand(
         "gitgpt.openAIAssistant",
         () => {
             try {
                 const webviewPanel = WebviewPanel.getInstance(context);
-                const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? (() => { throw new Error('No workspace folder is open.'); })();
+                const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
 
                 webviewPanel.onDidReceiveMessage((message) => {
                     if (message.type === "task") {
@@ -47,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    let openGitLogViewer = vscode.commands.registerCommand(
+    const openGitLogViewer = vscode.commands.registerCommand(
         "gitgpt.openGitLogViewer",
         () => {
             try {
@@ -55,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
                  * webviewpanel應設置為可以打開兩個不同的webview
                  */
                 const webviewPanel = WebviewPanel.getInstance(context);
-                const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath ?? (() => { throw new Error('No workspace folder is open.'); })();
+                const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
 
                 webviewPanel.onDidReceiveMessage((message) => {
                     /**
@@ -73,7 +118,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    context.subscriptions.push(queryLLM, openAIAssistant, openGitLogViewer);
+
+    context.subscriptions.push(queryLLM, openAIAssistant, openGitLogViewer, selectWorkspaceCommand, statusBarItem);
 }
 
 export function deactivate() { }
