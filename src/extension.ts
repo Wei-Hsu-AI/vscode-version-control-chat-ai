@@ -4,59 +4,71 @@ import { exec } from 'child_process';
 import { WebviewPanel } from './webviewPanel';
 import * as path from 'path';
 
-let currentWorkspace: string | undefined;
+class WorkspaceManager {
+    private currentWorkspace: string | undefined;
+    private statusBarItem: vscode.StatusBarItem;
 
-async function selectWorkspaceFolder(): Promise<string | undefined> {
-    const folderUri = await vscode.window.showOpenDialog({
-        canSelectFiles: false,
-        canSelectFolders: true, // 只允許選擇資料夾
-        canSelectMany: false, // 只允許選擇一個
-        openLabel: '選擇資料夾'
-    });
+    constructor(context: vscode.ExtensionContext) {
+        // 初始化 Status Bar Item
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+        this.statusBarItem.command = "gitgpt.selectWorkspace";
+        this.currentWorkspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        this.updateStatusBarItem();
 
-    if (folderUri && folderUri[0]) {
-        return folderUri[0].fsPath; // 返回選中的資料夾路徑
-    } else {
-        return undefined;
+        const selectWorkspaceCommand = vscode.commands.registerCommand("gitgpt.selectWorkspace", async () => {
+            const folderPath = await this.selectWorkspaceFolder();
+            if (folderPath) {
+                vscode.window.showInformationMessage(`Selected workspace folder: ${folderPath}`);
+                this.currentWorkspace = folderPath;
+                this.updateStatusBarItem();
+            }
+        });
+
+        context.subscriptions.push(selectWorkspaceCommand, this.statusBarItem);
     }
-}
 
-function updateStatusBarItem(statusBarItem: vscode.StatusBarItem) {
-    if (currentWorkspace) {
-        // 僅顯示資料夾名稱，而非完整路徑
-        const folderName = path.basename(currentWorkspace);
-        statusBarItem.text = `$(folder) ${folderName}`;
-        statusBarItem.tooltip = `${currentWorkspace}`; // 保留完整路徑作為工具提示
-    } else {
-        statusBarItem.text = `$(folder) No Workspace`;
-        statusBarItem.tooltip = 'No workspace folder selected';
+    // 選擇 Workspace 資料夾
+    private async selectWorkspaceFolder(): Promise<string | undefined> {
+        const folderUri = await vscode.window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            openLabel: "選擇資料夾",
+        });
+
+        return folderUri?.[0]?.fsPath;
     }
-    statusBarItem.show();
+
+    // 更新 Status Bar Item 顯示
+    private updateStatusBarItem() {
+        if (this.currentWorkspace) {
+            const folderName = path.basename(this.currentWorkspace);
+            this.statusBarItem.text = `$(folder) ${folderName}`;
+            this.statusBarItem.tooltip = this.currentWorkspace;
+        } else {
+            this.statusBarItem.text = `$(folder) No Workspace`;
+            this.statusBarItem.tooltip = "No workspace folder selected";
+        }
+        this.statusBarItem.show();
+    }
+
+    // 獲取當前 Workspace
+    public getCurrentWorkspace(): string {
+        if (!this.currentWorkspace) {
+            throw new Error("No workspace folder is open.");
+        }
+        return this.currentWorkspace;
+    }
 }
 
 
 export function activate(context: vscode.ExtensionContext) {
-    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    statusBarItem.command = 'gitgpt.selectWorkspace';
-
-    currentWorkspace =
-        vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ??
-        undefined;
-    updateStatusBarItem(statusBarItem); // 初始化 Status Bar 顯示
-
-    const selectWorkspaceCommand = vscode.commands.registerCommand('gitgpt.selectWorkspace', async () => {
-        const folderPath = await selectWorkspaceFolder();
-        if (folderPath) {
-            vscode.window.showInformationMessage(`Selected workspace folder: ${folderPath}`);
-            currentWorkspace = folderPath; // 更新當前 Workspace
-            updateStatusBarItem(statusBarItem); // 更新 Status Bar
-        }
-    });
+    const workspaceManager = new WorkspaceManager(context);
 
     const queryLLM = vscode.commands.registerCommand(
         'gitgpt.queryLLM',
         async () => {
-            const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
+            const cwd = workspaceManager.getCurrentWorkspace();
 
             exec('git status', { encoding: 'buffer', cwd: cwd }, (error, stdout, stderr) => {
                 if (error) {
@@ -73,7 +85,7 @@ export function activate(context: vscode.ExtensionContext) {
         () => {
             try {
                 const webviewPanel = WebviewPanel.getInstance(context);
-                const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
+                const cwd = workspaceManager.getCurrentWorkspace();
 
                 webviewPanel.onDidReceiveMessage((message) => {
                     if (message.type === "task") {
@@ -100,7 +112,7 @@ export function activate(context: vscode.ExtensionContext) {
                  * webviewpanel應設置為可以打開兩個不同的webview
                  */
                 const webviewPanel = WebviewPanel.getInstance(context);
-                const cwd = currentWorkspace ?? (() => { throw new Error('No workspace folder is open.'); })();
+                const cwd = workspaceManager.getCurrentWorkspace();
 
                 webviewPanel.onDidReceiveMessage((message) => {
                     /**
@@ -119,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
 
-    context.subscriptions.push(queryLLM, openAIAssistant, openGitLogViewer, selectWorkspaceCommand, statusBarItem);
+    context.subscriptions.push(queryLLM, openAIAssistant, openGitLogViewer);
 }
 
 export function deactivate() { }
