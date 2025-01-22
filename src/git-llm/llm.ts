@@ -1,57 +1,29 @@
-import Groq from 'groq-sdk';
+import axios from 'axios';
 import { Message } from './types';
-import { SECURITY_CHECK, TOOLS_PROMPT } from './prompt';
 
-class LLM {
-  private model: string;
-  private groq: Groq;
+// TODO: Change this to the actual API URL
+const API_ENDPOINT = 'http://localhost:5001';
 
-  constructor(apiKey: string, model: string = "llama-3.3-70b-versatile") {
-    this.model = model;
-    this.groq = new Groq({ apiKey });
-  }
-
+export default class LLM {
   async callLLM(
     messages: Message[],
-    options: { temperature?: number; model?: string, toolUse ?: boolean } = {}
+    options: { temperature?: number; model?: string; toolUse?: boolean } = {}
   ): Promise<any> {
-    const selectedModel = options.model || this.model;
-    const toolUse = options.toolUse == undefined ? true : options.toolUse;
-    
-    const completion = await this.groq.chat.completions.create({
-      model: selectedModel,
-      messages: messages as any,
+    const toolUse = options.toolUse === undefined ? true : options.toolUse;
+
+    const response = await axios.post(`${API_ENDPOINT}/call-llm`, {
+      messages,
       temperature: options.temperature || 1.0,
-      max_tokens: 1024,
-      top_p: 1,
-      tools: toolUse ? TOOLS_PROMPT as any : null,
-      tool_choice: toolUse ? "auto" : "none",
-      seed: 42
+      toolUse
     });
 
-    const msg = completion.choices[0].message;
-    return msg;
-  }
-
-  private async simpleSecurityCheck(command: string): Promise<boolean> {
-    const messages: Message[] = [
-      { role: "system", content: SECURITY_CHECK },
-      { role: "user", content: command }
-    ];
-
-    const completion = await this.callLLM(messages, { model: "llama-3.1-8b-instant", toolUse: false });
-    const content = completion.content.replace("\n", "").trim();
-
-    return content.includes("Y") && !content.includes("N");
-  }
-
-  private llamaGuardCheck(command: string): boolean {
-    throw new Error("Method not implemented.");
+    return response.data;
   }
 
   async securityCheck(command: string): Promise<boolean> {
-    return this.simpleSecurityCheck(command);
+    const response = await axios.post(`${API_ENDPOINT}/security-check`, {
+      command
+    });
+    return response.data.is_safe;
   }
 }
-
-export default LLM;
