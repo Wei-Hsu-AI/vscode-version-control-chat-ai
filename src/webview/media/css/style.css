@@ -1,3 +1,4 @@
+/* Global Reset */
 * {
     margin: 0;
     padding: 0;
@@ -5,6 +6,7 @@
     font-family: 'Poppins', sans-serif;
 }
 
+/* Color Variables */
 :root {
     --text-color: #FFFFFF;
     --icon-color: #ACACBE;
@@ -14,6 +16,9 @@
     --incoming-chat-bg: #444654;
     --outgoing-chat-border: #343541;
     --incoming-chat-border: #444654;
+    --button-bg: #5B5E71;
+    --button-hover-bg: #4A4E58;
+    --shadow-light: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .light-mode {
@@ -27,12 +32,12 @@
     --incoming-chat-border: #D9D9E3;
 }
 
+/* Body */
 body {
     background-color: var(--outgoing-chat-bg);
 }
 
 /* Typing Container Style */
-
 .typing-container {
     position: fixed;
     bottom: 0;
@@ -114,11 +119,8 @@ body {
     background: var(--icon-hover-bg);
 }
 
-/* Responsive media query */
-
+/* Responsive Media Query */
 @media screen and (max-width: 600px) {
-
-    /* Typing Container */
     .typing-container {
         padding: 15px 10px;
     }
@@ -139,46 +141,86 @@ body {
     }
 }
 
-/* 
-    Jimmyhealer
-*/
+/* Chat Container */
 .chat-container {
     overflow-y: auto;
     height: calc(100vh - 96px);
 }
 
-.button {
-    cursor: pointer;
+/* 訊息行容器 (包含圖標和訊息內容) */
+.message-row {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
 }
 
-.option {
-    font-size: 18px;
-    margin: 0 4px;
-    padding: 0 4px;
-    min-width: 48px;
-    background-color: #b9b9ff;
-    color: var(--text-color);
-    border-radius: 5px;
+/* AI 訊息的圖標 */
+.icon {
+    font-size: 1.5rem; /* 圖標大小 */
+    color: var(--icon-color);
+    margin-right: 12px; /* 圖標與訊息的間距 */
+    display: flex;
+    align-items: center; /* 讓圖標垂直居中 */
+    justify-content: center; /* 讓圖標水平居中 */
+    height: 100%; /* 使圖標容器的高度與訊息相等，讓圖標垂直居中 */
 }
 
+/* General Message Styles */
 .message {
-    margin: 5px 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+    margin: 25px 0;
+    padding: 12px 18px;
+    border-radius: 15px;
     background-color: var(--incoming-chat-bg);
     color: var(--text-color);
-    font-size: 20px;
-}
-
-.message.ai {
-    background-color: var(--incoming-chat-bg);
+    font-size: 16px;
+    word-wrap: break-word;
+    max-width: 75%;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.2s, background 0.2s;
 }
 
 .message.user {
-    background-color: var(--outgoing-chat-bg);
+    margin-left: auto;
+    border: 1px solid var(--outgoing-chat-border);
 }
 
+.message.ai {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    box-shadow: none;
+}
+
+.message.ai .option {
+    margin-right: 10px;
+    margin-top: 5px;
+    font-size: 14px;
+    padding: 5px 10px;
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border: 1px solid var(--button-bg);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+.message.ai .option:last-child {
+    margin-right: 0;
+}
+
+.message.ai .option:hover {
+    background-color: var(--button-hover-bg);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-light);
+}
+
+/* Flexbox for Row and Column */
 .row {
     display: flex;
     justify-content: space-between;
@@ -191,10 +233,7 @@ body {
     width: 50%;
 }
 
-/* 
-D3 style
-*/
-
+/* D3 style */
 svg {
     width: 100%;
     height: calc(100vh - 96px);

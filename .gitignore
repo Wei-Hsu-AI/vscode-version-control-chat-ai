@@ -30,3 +30,5 @@ coverage/
 # 環境變數檔案
 .env
 .env.*
+
+src/git-llm/index.ts

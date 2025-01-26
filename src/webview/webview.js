@@ -104,8 +104,28 @@ window.addEventListener("DOMContentLoaded", () => {
     function addMessageToChat(type, text, options) {
         const messageDiv = document.createElement("div");
         messageDiv.className = `message ${type}`;
+
+        // 創建包含訊息的行容器
+        const messageRow = document.createElement("div");
+        messageRow.className = "message-row";
+
+        // 當訊息是AI的時候，添加圖標
+        if (type === "ai") {
+            const iconDiv = document.createElement("span");
+            iconDiv.className = "icon";
+            iconDiv.innerHTML = "🤖"; // 這裡使用 emoji 圖標，可以換成其他圖片或符號
+            messageRow.appendChild(iconDiv); // 把圖標放在訊息的左側
+        }
+        
         // 將 \n 替換為 <br> 並插入為 HTML
-        messageDiv.innerHTML = `${type}: ${text.replace(/\n/g, "<br>")}`;
+        messageDiv.innerHTML = `${text.replace(/\n/g, "<br>")}`;
+
+        // 將訊息內容放到訊息行容器
+        messageRow.appendChild(messageDiv);
+
+        // 把整個訊息行容器加入到訊息視窗中
+        chatContainer.appendChild(messageRow);
+
         if (options) {
             const optionsDiv = document.createElement("div");
             optionsDiv.className = "options";
@@ -124,7 +144,8 @@ window.addEventListener("DOMContentLoaded", () => {
             messageDiv.appendChild(optionsDiv);
         }
 
-        chatContainer.appendChild(messageDiv);
+        // 將訊息行容器加入到聊天視窗
+        chatContainer.appendChild(messageRow);
 
         // 滾動到底部
         chatContainer.scrollTop = chatContainer.scrollHeight;
