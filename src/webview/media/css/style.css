@@ -150,7 +150,7 @@ body {
 /* 訊息行容器 (包含圖標和訊息內容) */
 .message-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     flex-direction: row;
 }
 
@@ -186,9 +186,9 @@ body {
 
 .message.ai {
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    flex-wrap: wrap;
     width: 100%;
     max-width: 100%;
     background-color: transparent;
@@ -198,7 +198,6 @@ body {
 }
 
 .message.ai .option {
-    margin-right: 10px;
     margin-top: 5px;
     font-size: 14px;
     padding: 5px 10px;
@@ -218,6 +217,14 @@ body {
     background-color: var(--button-hover-bg);
     transform: scale(1.02);
     box-shadow: var(--shadow-light);
+}
+
+/* 選項容器樣式 */
+.message.ai .options {
+    display: flex;
+    flex-direction: row;  /* 確保選項縱向排列 */
+    margin-top: 10px;  /* 給訊息和選項之間增加一些間距 */
+    gap: 5px;  /* 選項之間的間距 */
 }
 
 /* Flexbox for Row and Column */
